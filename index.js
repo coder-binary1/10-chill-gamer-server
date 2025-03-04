@@ -22,8 +22,15 @@ async function run() {
   try {
     await client.connect();
 
-    const userCollections = client.db("gameDB").collection("userCollection");
-    const gameCollections = client.db("gameDB").collection("gameCollection");
+    const userCollection = client.db("gameDB").collection("userCollection");
+    const gameCollection = client.db("gameDB").collection("gameCollection");
+    const reviewCollection = client.db("gameDB").collection("reviewCollection");
+
+    app.post("/gameReview", async (req, res) => {
+      const review = req.body;
+      const result = await reviewCollection(review);
+      res.send(result);
+    });
 
     app.post("/user", async (req, res) => {
       const userData = req.body;
@@ -36,7 +43,7 @@ async function run() {
           lastLoginAt: userData.lastLoginAt,
         },
       };
-      const result = await userCollections.updateOne(
+      const result = await userCollection.updateOne(
         filter,
         upDateLastLogin,
         options
