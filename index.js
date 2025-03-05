@@ -1,7 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 
 const port = process.env.port || 5000;
 const app = express();
@@ -24,11 +24,48 @@ async function run() {
 
     const userCollection = client.db("gameDB").collection("userCollection");
     const gameCollection = client.db("gameDB").collection("gameCollection");
-    const reviewCollection = client.db("gameDB").collection("reviewCollection");
 
-    app.post("/gameReview", async (req, res) => {
+    app.get("/games", async (req, res) => {
+      const limit = parseInt(req.query.limit);
+      const sort = req.query.sort;
+      let cursor = gameCollection.find().limit(limit);
+      if (sort) {
+        cursor = cursor.sort({ rating: sort });
+      }
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/games/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await gameCollection.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/reviews", async (req, res) => {
+      const limit = req.query.limit;
+      const cursor = gameCollection.find();
+      const allData = await cursor.toArray();
+      const result = [];
+      allData.map((data) =>
+        data.reviews.map((dt) =>
+          result.push({ id: data._id, title: data.title, ...dt })
+        )
+      );
+      if (limit) {
+        function getRandomReviews(arr) {
+          const randomReview = arr.sort(() => 0.5 - Math.random());
+          return randomReview.slice(0, 3);
+        }
+        res.send(getRandomReviews(result));
+      } else {
+        res.send(result);
+      }
+    });
+    app.post("/reviews", async (req, res) => {
       const review = req.body;
-      const result = await reviewCollection(review);
+      const result = await reviewCollection.insertOne(review);
       res.send(result);
     });
 
