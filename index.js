@@ -23,36 +23,34 @@ async function run() {
     await client.connect();
 
     const userCollection = client.db("gameDB").collection("userCollection");
-    const gameCollection = client.db("gameDB").collection("gameCollection");
     const reviewCollection = client.db("gameDB").collection("reviewCollection");
+    const watchListCollection = client
+      .db("gameDB")
+      .collection("watchListCollection");
 
     app.get("/games", async (req, res) => {
       const limit = parseInt(req.query.limit);
-      const getTitle = req.query.getTitle;
-      console.log(getTitle);
-
       const sort = req.query.sort;
       let cursor = reviewCollection.find().limit(limit);
       if (sort) {
         cursor = cursor.sort({ rating: sort });
       }
       const result = await cursor.toArray();
-
-      if (getTitle) {
-        const title = [];
-        result.map((res) => title.push(res.title));
-        res.send(title);
-      } else {
-        res.send(result);
-      }
+      res.send(result);
     });
 
     app.get("/review", async (req, res) => {
-      const limit = req.query.limit;
-      const cursor = reviewCollection.find();
+      const { limit, email, filter } = req.query;
+      let query = {};
+      if (email) {
+        query = { email: email };
+      }
+
+      const cursor = reviewCollection.find(query);
       const result = await cursor.toArray();
 
       if (limit) {
+        // make the output dynamic, so avoid database limit() method
         function getRandomReviews(arr) {
           const randomReview = arr.sort(() => 0.5 - Math.random());
           return randomReview.slice(0, limit);
@@ -73,10 +71,75 @@ async function run() {
       const result = await reviewCollection.insertOne(review);
       res.send(result);
     });
+    app.put("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const {
+        title,
+        thumbnail,
+        published_year,
+        genre,
+        rating,
+        review,
+        name,
+        email,
+      } = req.body;
+      const query = { _id: new ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          title,
+          thumbnail,
+          published_year,
+          genre,
+          rating,
+          review,
+          name,
+          email,
+        },
+      };
+      const result = await reviewCollection.updateOne(query, updateDoc);
+      res.send(result);
+    });
+    app.delete("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await reviewCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.get("/watchList", async (req, res) => {
+      const query = { email: req.query.email };
+      const options = { projection: { _id: 0, watchList: 1 } };
+      const watchList = await watchListCollection.findOne(query, options);
+      const cursor = reviewCollection.find();
+      const allReview = await cursor.toArray();
+      const result = allReview.filter((review) =>
+        watchList?.watchList.includes(review._id.toString())
+      );
+
+      res.send(result);
+    });
+    app.put("/watchList/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { email: req.body.email };
+      options = { upsert: true };
+      const updateDoc = {
+        $addToSet: {
+          watchList: id,
+        },
+      };
+
+      const result = await watchListCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      console.log(result);
+
+      res.send(result);
+    });
 
     app.get("/user", async (req, res) => {
-      const email = req.query.email;
-      const query = { email: email };
+      const query = { email: req.query.email };
       const options = {
         projection: { _id: 0, photoUrl: 1 },
       };
