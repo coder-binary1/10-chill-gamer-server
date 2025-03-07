@@ -6,6 +6,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const port = process.env.port || 5000;
 const app = express();
 
+// middleware
 app.use(cors());
 app.use(express.json());
 
@@ -20,7 +21,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const userCollection = client.db("gameDB").collection("userCollection");
     const reviewCollection = client.db("gameDB").collection("reviewCollection");
@@ -133,8 +134,6 @@ async function run() {
         updateDoc,
         options
       );
-      console.log(result);
-
       res.send(result);
     });
 
@@ -166,7 +165,7 @@ async function run() {
       res.send(result);
     });
 
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
