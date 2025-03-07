@@ -11,11 +11,11 @@ This is the backend of the **[Chill Gamer](https://github.com/coder-binary1/10-c
 ## Technologies Used
 
 <div align="left">
-  <img height="48px" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original-wordmark.svg" alt="nodejs"
+  <img height="64px" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/nodejs/nodejs-original-wordmark.svg" alt="nodejs"
   />
-  <img height="48px" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/express/express-original-wordmark.svg" alt="express"
+  <img height="64px" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/express/express-original-wordmark.svg" alt="express"
   />
-  <img height="48px" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original-wordmark.svg" alt="mongoDB" />
+  <img height="64px" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mongodb/mongodb-original-wordmark.svg" alt="mongoDB" />
 </div>
 
 ## Setup & Installation
